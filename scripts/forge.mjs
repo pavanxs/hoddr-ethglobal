@@ -1,0 +1,13 @@
+import fs from 'node:fs';import path from 'node:path';import {fileURLToPath}from'node:url';import{spawn}from'node:child_process';
+const root=fileURLToPath(new URL('..',import.meta.url)),contracts=path.join(root,'contracts');
+if(!fs.existsSync(path.join(contracts,'foundry.toml')))throw new Error('Missing contracts/foundry.toml; refusing parent dotenv discovery.');
+const binary=path.join(root,'.tools','foundry',process.platform==='win32'?'forge.exe':'forge');
+if(!fs.existsSync(binary))throw new Error('Run node scripts/setup-tools.mjs first.');
+const env={};
+for(const key of ['PATH','Path','SystemRoot','SYSTEMROOT','WINDIR','COMSPEC','PATHEXT','NUMBER_OF_PROCESSORS'])if(process.env[key])env[key]=process.env[key];
+const tmp=path.join(root,'.tools','tmp');fs.mkdirSync(tmp,{recursive:true});
+Object.assign(env,{TEMP:tmp,TMP:tmp,FOUNDRY_CONFIG:path.join(contracts,'foundry.toml'),FOUNDRY_DISABLE_NIGHTLY_WARNING:'1',GIT_TERMINAL_PROMPT:'0'});
+const args=process.argv.slice(2);if(!args.length)args.push('test');
+const child=spawn(binary,args,{cwd:contracts,env,stdio:'inherit',windowsHide:true});
+child.on('error',e=>{console.error(e.message);process.exitCode=1;});
+child.on('exit',(code,signal)=>{process.exitCode=code??1;if(signal)console.error('Forge stopped by '+signal);});

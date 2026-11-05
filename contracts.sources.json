@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "name": "cca",
+      "repository": "Uniswap/continuous-clearing-auction",
+      "commit": "7d7602d257733315434570f2a0c2f94f1c7b207a"
+    },
+    {
+      "name": "liquidity-launcher",
+      "repository": "Uniswap/liquidity-launcher",
+      "commit": "1c5904912aefceaceb89c24528cd5e25d0b61597"
+    },
+    {
+      "name": "forge-std",
+      "repository": "foundry-rs/forge-std",
+      "commit": "3b20d60d14b343ee4f908cb8079495c07f5e8981"
+    },
+    {
+      "name": "blocknumberish",
+      "repository": "Uniswap/blocknumberish",
+      "commit": "38fe20bc0341d5bc2780d41f90dadb70e10f8cea"
+    },
+    {
+      "name": "permit2",
+      "repository": "Uniswap/permit2",
+      "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219"
+    },
+    {
+      "name": "v4-core",
+      "repository": "Uniswap/v4-core",
+      "commit": "59d3ecf53afa9264a16bba0e38f4c5d2231f80bc"
+    },
+    {
+      "name": "v4-periphery",
+      "repository": "Uniswap/v4-periphery",
+      "commit": "ad04c9f24a170accf5ea1b2836bbafd514537ca6"
+    },
+    {
+      "name": "openzeppelin-contracts",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "21c8312b022f495ebe3621d5daeed20552b43ff9"
+    },
+    {
+      "name": "solady",
+      "repository": "Vectorized/solady",
+      "commit": "33b4b98e350bbcba6aa85642957c313e98b5f911"
+    },
+    {
+      "name": "cca-openzeppelin-contracts",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "e4f70216d759d8e6a64144a9e1f7bbeed78e7079"
+    },
+    {
+      "name": "cca-solady",
+      "repository": "Vectorized/solady",
+      "commit": "2af06408b6a204824c2ecb245779ed400b535fb5"
+    },
+    {
+      "name": "cca-v4-periphery",
+      "repository": "Uniswap/v4-periphery",
+      "commit": "60cd93803ac2b7fa65fd6cd351fd5fd4cc8c9db5"
+    },
+    {
+      "name": "cca-liquidity-launcher",
+      "repository": "Uniswap/liquidity-launcher",
+      "commit": "3a3103543f50a13a0ae52a253bb98a925d72146f"
+    },
+    {
+      "name": "solmate",
+      "repository": "transmissions11/solmate",
+      "commit": "4b47a19038b798b4a33d9749d25e570443520647"
+    },
+    {
+      "name": "v4-core-openzeppelin-contracts",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3"
+    },
+    {
+      "name": "permit2-solmate",
+      "repository": "transmissions11/solmate",
+      "commit": "8d910d876f51c3b2585c9109409d601f600e68e1"
+    },
+    {
+      "name": "permit2-openzeppelin-contracts",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "d3ff81b37f3c773b44dcaf5fda212c7176eef0e2"
+    }
+  ]
+}

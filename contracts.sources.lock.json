@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "name": "blocknumberish",
+      "repository": "Uniswap/blocknumberish",
+      "commit": "38fe20bc0341d5bc2780d41f90dadb70e10f8cea",
+      "sha256": "6d272c626e60f947853c0b3f1987006ee0810c99b39e4a62f9f99d9e6ccf33ad"
+    },
+    {
+      "name": "cca",
+      "repository": "Uniswap/continuous-clearing-auction",
+      "commit": "7d7602d257733315434570f2a0c2f94f1c7b207a",
+      "sha256": "310edf74e8fee45dc6530cdc807b1469cc7149b0d14cd68c0f8fa85d855ff6d7"
+    },
+    {
+      "name": "cca-liquidity-launcher",
+      "repository": "Uniswap/liquidity-launcher",
+      "commit": "3a3103543f50a13a0ae52a253bb98a925d72146f",
+      "sha256": "1892fd4775c8a4b5378b131f10da7df15834b9024d9d4e2e4ba07feb8aab2e19"
+    },
+    {
+      "name": "cca-openzeppelin-contracts",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "e4f70216d759d8e6a64144a9e1f7bbeed78e7079",
+      "sha256": "49c41e34c683c6593932aa6c5485e621e61ec55d2b9c7c74b5e1aed99c9715a5"
+    },
+    {
+      "name": "cca-solady",
+      "repository": "Vectorized/solady",
+      "commit": "2af06408b6a204824c2ecb245779ed400b535fb5",
+      "sha256": "ef1f9fcfbbc796d7c8801e6d04135a7075cc4d1729a2fa8bc5615eb41fc1a460"
+    },
+    {
+      "name": "cca-v4-periphery",
+      "repository": "Uniswap/v4-periphery",
+      "commit": "60cd93803ac2b7fa65fd6cd351fd5fd4cc8c9db5",
+      "sha256": "0afbed102138dccf55ddc72b49f3bc2a40ca74774a9496ba3883e544ae2688a3"
+    },
+    {
+      "name": "forge-std",
+      "repository": "foundry-rs/forge-std",
+      "commit": "3b20d60d14b343ee4f908cb8079495c07f5e8981",
+      "sha256": "eb94c3bd026342ae6955ce08f76aad648c586c003acebf5ee5d9b419a417076c"
+    },
+    {
+      "name": "liquidity-launcher",
+      "repository": "Uniswap/liquidity-launcher",
+      "commit": "1c5904912aefceaceb89c24528cd5e25d0b61597",
+      "sha256": "280e6901c9b6ad0330c271276bd1e2b1465dcdf4e0e355364d6ace7db7228b77"
+    },
+    {
+      "name": "openzeppelin-contracts",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "21c8312b022f495ebe3621d5daeed20552b43ff9",
+      "sha256": "3555120c56d57d4c1eee695550fa10740c1b280313c22f2787065cd664090bf4"
+    },
+    {
+      "name": "permit2",
+      "repository": "Uniswap/permit2",
+      "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+      "sha256": "1f0da63e66c69fa85f2a68af7f598aca8f3354f87e7703aa3abe6522685e9f04"
+    },
+    {
+      "name": "permit2-openzeppelin-contracts",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "d3ff81b37f3c773b44dcaf5fda212c7176eef0e2",
+      "sha256": "984fe7cba8d87717812cd7a4e3da4ea8491ce1e77c6372b2f29460feb3b3dcab"
+    },
+    {
+      "name": "permit2-solmate",
+      "repository": "transmissions11/solmate",
+      "commit": "8d910d876f51c3b2585c9109409d601f600e68e1",
+      "sha256": "c5dabbbb15de9fc375281e336bce798c910e7dd6a172940556918767f5974c91"
+    },
+    {
+      "name": "solady",
+      "repository": "Vectorized/solady",
+      "commit": "33b4b98e350bbcba6aa85642957c313e98b5f911",
+      "sha256": "c0221bc394a685730337ddff8a8ebec448f7ed704f3ce3d0c1a21f80fd587726"
+    },
+    {
+      "name": "solmate",
+      "repository": "transmissions11/solmate",
+      "commit": "4b47a19038b798b4a33d9749d25e570443520647",
+      "sha256": "9aa78449f8bc10931520500ec24734f089af9ac875a3334d8b512f8727241667"
+    },
+    {
+      "name": "v4-core",
+      "repository": "Uniswap/v4-core",
+      "commit": "59d3ecf53afa9264a16bba0e38f4c5d2231f80bc",
+      "sha256": "130e1ae60c10254ecebadd9d963294617081da7fb3f7f5c3b98e3f0db06769a6"
+    },
+    {
+      "name": "v4-core-openzeppelin-contracts",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "sha256": "4a9c091852052f4319173629e0bf0b5cdf7a39d70e5e2298a7a6a149eff9f385"
+    },
+    {
+      "name": "v4-periphery",
+      "repository": "Uniswap/v4-periphery",
+      "commit": "ad04c9f24a170accf5ea1b2836bbafd514537ca6",
+      "sha256": "985d6218b0bf2d24a34a64658f0480d599351cde9dceb59153327543e6e6c717"
+    }
+  ]
+}
