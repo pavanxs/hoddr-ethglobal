@@ -1,0 +1,17 @@
+{
+  "foundry": {
+    "version": "1.9.0",
+    "platform": "win32-amd64",
+    "url": "https://github.com/foundry-rs/foundry/releases/download/v1.9.0/foundry_v1.9.0_win32_amd64.zip",
+    "sha256": "2b02444d46c9218fe2e6be66015265ce131fe6b7c384e33e630b00f9a0bff072"
+  },
+  "solc": {
+    "version": "0.8.26+commit.8a97fa7a",
+    "url": "https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/windows-amd64/solc-windows-amd64-v0.8.26+commit.8a97fa7a.exe",
+    "sha256": "537fd8d8d4a0433a971bf456fc06f7b021cdcee27b252f74da49e0d8559aeb67"
+  },
+  "upstream": {
+    "cca": "7d7602d257733315434570f2a0c2f94f1c7b207a",
+    "liquidityLauncher": "1c5904912aefceaceb89c24528cd5e25d0b61597"
+  }
+}

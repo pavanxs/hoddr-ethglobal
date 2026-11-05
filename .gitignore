@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+test-wallet.public.json
+.local-state/
+.local-chain/
+.tools/
+.vite/
+dist/
+node_modules/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+coverage/
+*.log

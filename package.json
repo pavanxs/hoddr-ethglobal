@@ -1,0 +1,10 @@
+{
+  "name": "hoddr-launchpad",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Phased CCA launchpad with identity limits, ENS eligibility and token locks",
+  "engines": {
+    "node": ">=24"
+  }
+}
