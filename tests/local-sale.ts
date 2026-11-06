@@ -1,0 +1,78 @@
+import assert from 'node:assert/strict';
+import {createPublicClient,http,parseUnits} from 'viem';
+import {foundry} from 'viem/chains';
+import {createLaunchpadClient} from '../src/chain/client';
+import {makeDefaultDraft} from '../src/ui/draft';
+
+const origin='http://127.0.0.1:5192';
+const realFetch=globalThis.fetch;
+globalThis.fetch=((input,init)=>{
+ const url=typeof input==='string' && input.startsWith('/') ? origin+input : input;
+ const headers=new Headers(init?.headers || (input instanceof Request ? input.headers : undefined));
+ headers.set('origin',origin);
+ return realFetch(url,{...init,headers});
+}) as typeof fetch;
+const rpc=createPublicClient({chain:foundry,transport:http('http://127.0.0.1:8547'),cacheTime:0});
+assert.equal(await rpc.getChainId(),31337);
+const app=createLaunchpadClient();
+const runtime=await (await fetch('/api/runtime')).json();
+const deployment=runtime.deployments.local;
+assert(deployment?.localTestOnly && deployment.chainId===31337);
+const [seller,member,linked,open]=deployment.accounts;
+const appState=()=>app.getSnapshot();
+const launch=async(id:string)=>(await appState()).launches.find(l=>l.id===id)!;
+const pos=async(id:string)=>(await appState()).positions.find(p=>p.id===id)!;
+const jump=async(target:number)=>{
+ const now=Number(await rpc.getBlockNumber({cacheTime:0}));
+ if(now<target)await app.advanceBlocks(target-now);
+};
+const topUpIdentity=async()=>{
+ if(!(await appState()).account?.verified)await app.verifyHuman(()=>{});
+};
+async function create(name:string,minimumRaise:string){
+ await app.selectAccount(seller.address);
+ const d=makeDefaultDraft();
+ Object.assign(d,{name,symbol:'HQA',totalSupply:'1000',saleBps:8000,liquidityBps:2000,ensDomain:'community.eth',minimumRaise,floorPrice:'0.001',startDelayBlocks:6});
+ d.phases[0]={...d.phases[0],durationBlocks:30,minimumBid:'0.01',verifiedCapStart:'0.5',verifiedCapEnd:'0.5'};
+ d.phases[1]={...d.phases[1],durationBlocks:24};
+ const result=await app.createLaunch(d);
+ assert(result.launchId);return result.launchId;
+}
+const id=await create('Local gated sale','0.05');
+await app.selectAccount(member.address);await topUpIdentity();
+await jump((await launch(id)).startBlock);
+assert.equal((await app.checkEns(id,'alice.community.eth')).valid,true);
+const bid={amount:'0.2',maxPrice:'0.01',lockDays:30,ensName:'alice.community.eth'};
+await app.placeBid(id,bid);
+await app.selectAccount(linked.address);await topUpIdentity();
+const allowance=await app.previewEligibility!(id,{lockDays:30,ensName:'alice-alt.community.eth'});
+assert.equal(parseUnits(allowance.cumulativeSpend,18),parseUnits('0.2',18));
+await assert.rejects(app.placeBid(id,{...bid,amount:'0.65',ensName:'alice-alt.community.eth'}));
+await app.selectAccount(open.address);
+assert.equal((await app.previewEligibility!(id,{lockDays:0})).eligible,false);
+const record=await launch(id);
+await jump(record.phases[1].startBlock);
+await app.placeBid(id,{amount:'0.02',maxPrice:'0.006',lockDays:0});
+await jump(record.endBlock+3);
+await app.migrate(id);
+const settled=await launch(id);
+assert.equal(settled.status,'graduated');assert(settled.poolId);assert(settled.treasury?.positionId);
+const recordOnchain=await rpc.readContract({address:deployment.factory,abi:runtime.abis.LaunchpadFactory,functionName:'launchAt',args:[BigInt(id)]}) as {settlement:`0x${string}`};
+const [price,liquidity,ownedLiquidity]=await rpc.readContract({address:recordOnchain.settlement,abi:runtime.abis.LaunchSettlementVault,functionName:'poolState'}) as [bigint,bigint,bigint];
+assert(price>0n && liquidity>0n && ownedLiquidity>0n,'Pool price and deposited liquidity must be positive');
+await app.selectAccount(member.address);await app.settle(id);await app.claim(id);
+let p=await pos(id);assert(parseUnits(p.lockedTokens,18)>0n);assert.equal(p.actions.unlock,false);
+await app.advanceTime!(30*86400+1);await app.unlock(id);p=await pos(id);assert.equal(p.lockedTokens,'0');
+await app.selectAccount(seller.address);
+await app.releaseProceeds!(id);await app.releasePosition!(id);
+assert.equal((await launch(id)).treasury?.positionReleased,true);
+console.log('Passed: two phases, shared identity cap, ENS, open bid, real pool + LP position, sale proceeds and locked token claim.');
+const failed=await create('Local refund sale','100');
+await app.selectAccount(open.address);
+const sale=await launch(failed);await jump(sale.phases[1].startBlock);
+await app.placeBid(failed,{amount:'0.02',maxPrice:'0.01',lockDays:0});
+await jump(sale.endBlock+3);await app.settle(failed);
+assert.equal(parseUnits((await pos(failed)).refundableAmount,18),parseUnits('0.02',18));
+await app.refund(failed);assert.equal((await pos(failed)).refundableAmount,'0');
+assert.equal((await launch(failed)).status,'failed');
+console.log('Passed: unsuccessful auction returned the full bid. Launch IDs '+id+' and '+failed+'.');

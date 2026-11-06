@@ -1,34 +1,45 @@
 # HODDR Launchpad
 
-A phased token launchpad combining Continuous Clearing Auctions, configurable participation limits, ENS eligibility and onchain human checks.
+Create a token sale, set rules for each phase, and let bidders choose a holding period. The launchpad runs a Uniswap Continuous Clearing Auction. A successful sale can initialize a v4 pool and mint its liquidity position.
 
-## Build status
+## Try the local app
 
-Initial development checkpoint. The full interface, contracts and local-chain integration are being built and tested. This repository does not yet represent a completed or audited deployment.
+Open [HODDR Launchpad](http://127.0.0.1:5192). Choose **Community member** in the wallet menu. In the seeded HODDR sale, use **Verify** for a synthetic local identity and enter `alice.community.eth`. Set a bid amount and a maximum price above the current clearing price. **My positions** holds buyer claims and refunds. **Seller collection** holds creator proceeds, unsold tokens and the liquidity position.
 
-The requested behavior is recorded in [the launchpad specification](docs/launchpad-spec.md).
+Local blocks advance when you transact or use **Local tools**. The example has 32 blocks for community members followed by 48 open blocks. The public Sepolia network requires a separate deployment.
 
-## Planned flow
+## Run from the repository
 
-1. Configure a token launch, phases, growing limits and lock choices.
-2. Select optional human verification and ENS parent-domain rules.
-3. Bid through a custody wrapper with contract-enforced limits.
-4. Create liquidity after a successful auction.
-5. Claim or refund according to the auction result; purchased tokens follow the chosen lock.
+The pinned tool installer targets Windows x64. The existing experiments workspace uses read-only dependencies from its parent. On a separate checkout, install this package’s declared dependencies first. Use Node 24 or later and Bun for the test commands.
 
-Unverified accounts may receive a small base allowance in open phases. Such per-account limits do not prevent account splitting.
+```sh
+node scripts/setup-tools.mjs
+node scripts/fetch-contracts.mjs
+node scripts/forge.mjs build
+node scripts/export-abis.mjs
+npm run dev
+```
 
-## Development
+The dev command starts a fresh, disposable Anvil chain on port 8547, deploys the contracts, and serves the API on 5193 and the UI on 5192. In a second terminal run `npm run demo:local` to create the example. Stopping the dev command ends that local chain. The local API uses Anvil's unlocked test accounts and binds to loopback.
 
-The first complete environment is a local Ethereum-compatible chain. Sepolia is used for external integration checks. A local wallet configuration may be created from [.env.example](.env.example); actual configuration and signing material are excluded from Git and must never be included in browser bundles.
+## What the sale enforces
 
-Toolchain pins and official binary checksums are in [toolchain.lock.json](toolchain.lock.json). Runtime/build instructions will be updated as the implementation lands.
+- Each block-based phase sets a minimum bid, separate starting and ending caps for verified and open bidders, and optional ENS eligibility. Verified wallets that belong to one identity share a budget. Open wallets each receive their own base cap.
+- ENS checks the current owner of a qualifying subname beneath the selected parent. A transferred or expired name can prevent new bids. A bidder can still collect an earlier purchase or refund.
+- A bid wrapper tracks the beneficiary and holds purchased tokens until its lock expires. ETH refunds can be withdrawn independently.
+- The token allocation must add up to 100%. This version uses native ETH, a 0.30% pool fee, tick spacing 60 and 50% of raised ETH as the liquidity budget. The creator receives the remaining available proceeds. The settlement contract checks the pool and LP position before releasing successful-sale proceeds.
+- World ID staging support uses a server-signed proof request and an onchain legacy Orb verifier. Local tests use clearly labeled fixtures. The standalone World ID lab’s staging success is separate from a public launchpad transaction. ZKPassport and ACE are unavailable in this version.
 
-## Upstream sources
+## Checks
 
-- [Uniswap Continuous Clearing Auction](https://github.com/Uniswap/continuous-clearing-auction), pinned at `7d7602d257733315434570f2a0c2f94f1c7b207a`.
-- [Uniswap Liquidity Launcher](https://github.com/Uniswap/liquidity-launcher), pinned at `1c5904912aefceaceb89c24528cd5e25d0b61597`.
-- [World ID onchain verification](https://docs.world.org/world-id/idkit/onchain-verification).
-- [ENSv2](https://docs.ens.domains/ensv2/).
+| Command | What it checks |
+| --- | --- |
+| `npm run test:contracts` | Solidity rules, locks, identity, ENS, refunds and actual v4 liquidity |
+| `npm run test:ui` | Forms, pricing limits and navigation |
+| `npm run test:world` | Staging request signing, proof binding and SDK provenance |
+| `npm run test:sale` | Two transaction flows against the running local app, covering a successful and a failed sale |
+| `npm run test:browser` | Desktop and phone browser navigation against the running app |
+| `node tests/browser-smoke.mjs --write-local` | Browser interactions that create an auction and move local test funds |
+| `npm run typecheck` and `npm run build` | TypeScript and production assets |
 
-The first World adapter targets legacy Orb proofs; it does not imply World ID 4.0 contract support. Optional verification providers remain disabled until their integrations are verified.
+See [launch rules](docs/launchpad-spec.md), [identity and ENS](docs/identity-ens.md), [World ID staging](docs/world-staging.md) and [pinned upstream sources](contracts.sources.json).

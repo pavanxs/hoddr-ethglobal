@@ -1,0 +1,39 @@
+import { useMemo, useState } from 'react';
+import { ArrowRight, ArrowUpRight, Clock3, Globe2, Layers3, Plus, Search, ShieldCheck, SlidersHorizontal, Sparkles, TrendingUp } from 'lucide-react';
+import type { AppSnapshot, Launch } from '../types';
+import { amount, compact, integer, raiseProgress, remainingBlocks } from '../ui/format';
+import { launchHref } from '../ui/routes';
+import { CapChart, DetailLink, EmptyState, LaunchBadge, LaunchIdentity, PhaseTimeline, Pill, ProgressBar } from '../components/Common';
+
+type Filter = 'all' | 'live' | 'upcoming' | 'ended';
+export default function Explore({ snapshot }: { snapshot: AppSnapshot }) {
+  const [filter, setFilter] = useState<Filter>('all');
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('newest');
+  const launches = useMemo(() => snapshot.launches.filter(launch => {
+    const matchesStatus = filter === 'all' || filter === 'ended' ? filter === 'all' || ['settling', 'graduated', 'failed'].includes(launch.status) : launch.status === filter;
+    const query = search.trim().toLowerCase();
+    return matchesStatus && (!query || [launch.name, launch.symbol, launch.description, launch.ensDomain ?? ''].some(text => text.toLowerCase().includes(query)));
+  }).sort((a, b) => sort === 'ending' ? a.endBlock - b.endBlock : sort === 'raised' ? Number(b.raised) - Number(a.raised) : (b.createdAt ?? b.startBlock) - (a.createdAt ?? a.startBlock)), [snapshot.launches, filter, search, sort]);
+  const featured = snapshot.launches.find(launch => launch.status === 'live') ?? snapshot.launches.find(launch => launch.status === 'upcoming');
+  const live = snapshot.launches.filter(launch => launch.status === 'live').length;
+  const totalRaised = snapshot.launches.reduce((sum, launch) => sum + Number(launch.raised), 0);
+  const totalBids = snapshot.launches.reduce((sum, launch) => sum + launch.totalBids, 0);
+  const counts: Record<Filter, number> = {
+    all: snapshot.launches.length, live, upcoming: snapshot.launches.filter(launch => launch.status === 'upcoming').length,
+    ended: snapshot.launches.filter(launch => ['settling', 'graduated', 'failed'].includes(launch.status)).length,
+  };
+
+  return <div className="page explore-page">
+    <header className="page-heading"><div><p className="eyebrow">HODDR LAUNCHPAD</p><h1>Community launches</h1><p>Find an auction, check who can bid, and see how much you can spend.</p></div><a className="button primary" href="#/create"><Plus size={18} />Create a launch</a></header>
+    <div className="overview-stats"><div><span className="stat-symbol"><TrendingUp size={18} /></span><p>Live auctions<strong>{integer(live)}<small>on this network</small></strong></p></div><div><span className="stat-symbol"><Layers3 size={18} /></span><p>Total raised<strong>{amount(totalRaised)}<small>{snapshot.quoteAsset.symbol}</small></strong></p></div><div><span className="stat-symbol"><Sparkles size={18} /></span><p>Bids placed<strong>{integer(totalBids)}<small>across {integer(snapshot.launches.length)} launches</small></strong></p></div></div>
+    {featured && <section className="featured-launch" aria-labelledby="featured-title"><div className="feature-copy"><div className="feature-label"><span className="eyebrow">{featured.status === 'live' ? 'OPEN FOR PARTICIPATION' : 'COMING UP NEXT'}</span><LaunchBadge status={featured.status} /></div><LaunchIdentity launch={featured} large /><p id="featured-title">{featured.description || 'A community launch with onchain limits and a clear path to liquidity.'}</p><div className="feature-metrics"><div><small>Raised</small><strong>{amount(featured.raised)} <span>{featured.quoteAsset.symbol}</span></strong></div><div><small>Tokens in auction</small><strong>{compact(featured.saleSupply)} <span>{featured.symbol}</span></strong></div><div><small>Phase</small><strong>{featured.phases[featured.currentPhaseIndex ?? 0]?.name ?? 'Scheduled'}</strong></div></div><a className="button ink" href={launchHref(featured.id)}>Explore this launch<ArrowUpRight size={17} /></a></div><div className="feature-visual"><div className="feature-visual-heading"><span><span className="small-dot" />LIMITS GROW WITH THE LAUNCH</span><Clock3 size={17} /></div><CapChart phases={featured.phases} currentBlock={snapshot.network.blockNumber} symbol={featured.quoteAsset.symbol} /><PhaseTimeline phases={featured.phases} currentBlock={snapshot.network.blockNumber} compact /><div className="feature-bottom"><span>{remainingBlocks(featured, snapshot.network.blockNumber)}</span><span>{featured.phases.length} phases<ArrowRight size={14} /></span></div></div></section>}
+    <section className="launch-directory" aria-labelledby="directory-title"><div className="section-heading"><div><h2 id="directory-title">Explore launches<span className="count-chip">{snapshot.launches.length}</span></h2><p>Filter auctions by status or search for a token or community.</p></div></div>
+      <div className="directory-controls"><div className="filter-tabs" role="group" aria-label="Filter launches">{(['all', 'live', 'upcoming', 'ended'] as Filter[]).map(key => <button key={key} className={filter === key ? 'selected' : ''} aria-pressed={filter === key} onClick={() => setFilter(key)}>{key === 'all' ? 'All launches' : key === 'live' ? 'Live' : key === 'upcoming' ? 'Upcoming' : 'Ended'}<span>{counts[key]}</span></button>)}</div><div className="directory-search"><label className="search-field"><Search size={17} /><input aria-label="Search launches" placeholder="Search launches" value={search} onChange={event => setSearch(event.target.value)} /></label><label className="sort-field"><SlidersHorizontal size={15} /><select aria-label="Sort launches" value={sort} onChange={event => setSort(event.target.value)}><option value="newest">Newest</option><option value="ending">Ending soon</option><option value="raised">Most raised</option></select></label></div></div>
+      {launches.length ? <div className="launch-grid">{launches.map(launch => <LaunchCard key={launch.id} launch={launch} block={snapshot.network.blockNumber} />)}</div> : <EmptyState icon={<Search size={26} />} title={snapshot.launches.length ? 'No matching launches' : 'Your next community starts here'} action={snapshot.launches.length ? <button className="button secondary" onClick={() => { setFilter('all'); setSearch(''); }}>Clear filters</button> : <a className="button primary" href="#/create">Create the first launch<ArrowRight size={16} /></a>}>{snapshot.launches.length ? 'Try another name or choose a different filter.' : 'Create a launch with phases, clear participation limits and a token lock that fits your community.'}</EmptyState>}
+    </section>
+  </div>;
+}
+function LaunchCard({ launch, block }: { launch: Launch; block: number }) {
+  return <article className={'launch-card accent-' + (launch.accent ?? 'mint')}><div className="card-top"><LaunchBadge status={launch.status} /><span className="card-clock"><Clock3 size={13} />{remainingBlocks(launch, block)}</span></div><LaunchIdentity launch={launch} /><p className="launch-description">{launch.description || 'A community-led launch with transparent auction rules.'}</p><div className="card-tags">{launch.provider !== 'none' && <span><ShieldCheck size={13} />Human limits</span>}{launch.ensDomain && <span><Globe2 size={13} />{launch.ensDomain}</span>}<span>{launch.phases.length} phases</span></div><div className="raise-row"><strong>{amount(launch.raised)}<small>{launch.quoteAsset.symbol}</small></strong><span>{amount(launch.minimumRaise)} minimum</span></div><ProgressBar value={raiseProgress(launch)} label={launch.name + ' minimum raise progress'} /><div className="card-footer"><span><small>Auction supply</small><strong>{compact(launch.saleSupply)} {launch.symbol}</strong></span><DetailLink id={launch.id} /></div></article>;
+}
