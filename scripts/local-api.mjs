@@ -30,6 +30,7 @@ function jsonFile(file, fallback) {
 }
 function deployment(network) {
   const value = jsonFile(deploymentFiles[network], null);
+  if (network === 'sepolia' && value && (value.forkOnly || value.localTestOnly !== false)) throw new Error('Public Sepolia requires a public deployment record.');
   if (value && value.chainId !== endpoints[network].chainId) throw new Error('Deployment chain does not match its network.');
   return value;
 }

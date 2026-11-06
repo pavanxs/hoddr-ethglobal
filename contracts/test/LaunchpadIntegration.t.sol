@@ -81,8 +81,12 @@ contract LaunchpadIntegrationTest is Test {
             "PositionManager.sol:PositionManager",
             abi.encode(poolManager, IAllowanceTransfer(address(0)), uint256(100_000), IPositionDescriptor(address(0)), IWETH9(address(0)))
         ));
+        _configureLauncher(address(fees));
+    }
+
+    function _configureLauncher(address controller) internal {
         ccaFactory = ContinuousClearingAuctionFactory(_deploy(
-            "ContinuousClearingAuctionFactory.sol:ContinuousClearingAuctionFactory", abi.encode(address(fees))
+            "ContinuousClearingAuctionFactory.sol:ContinuousClearingAuctionFactory", abi.encode(controller)
         ));
         strategy = _deployStrategy();
         implementation = LaunchSettlementVault(payable(_deploy(
@@ -268,6 +272,15 @@ contract LaunchpadIntegrationTest is Test {
     }
 
     function testRealAuctionMigrationAndPurchasedTokenLock() public {
+        _assertMigrationAndPurchasedTokenLock();
+    }
+
+    function testZeroControllerSupportsStockMigrationAndPurchasedTokenLock() public {
+        _configureLauncher(address(0));
+        _assertMigrationAndPurchasedTokenLock();
+    }
+
+    function _assertMigrationAndPurchasedTokenLock() internal {
         _create(false, 1);
         uint256 bidId = _bid(1 ether);
         assertEq(token.balanceOf(address(auction)), 800 ether);
@@ -320,6 +333,15 @@ contract LaunchpadIntegrationTest is Test {
     }
 
     function testDirectUpstreamMigrateEscrowsThenRealRecoveryCreatesPool() public {
+        _assertDirectMigrationRecovery();
+    }
+
+    function testZeroControllerSupportsEscrowAndActualPoolRecovery() public {
+        _configureLauncher(address(0));
+        _assertDirectMigrationRecovery();
+    }
+
+    function _assertDirectMigrationRecovery() internal {
         _create(false, 0);
         uint256 bidId = _bid(1 ether);
         _finishAuction();
@@ -511,6 +533,33 @@ contract LaunchpadIntegrationTest is Test {
         fees.setGlobalProtocolFeePips(1);
         vm.expectRevert(ZeroFeeController.FeesAreImmutable.selector);
         fees.setProtocolFeeRecipient(stranger);
+    }
+
+    function testBothConstructorsRejectOtherNonzeroFeeControllers() public {
+        // Simulate the stock factory reporting a different immutable controller.
+        for (uint256 i; i < 2; ++i) {
+            address unsupported = i == 0 ? address(implementation) : stranger;
+            vm.mockCall(address(ccaFactory), abi.encodeWithSelector(ccaFactory.protocolFeeController.selector),
+                abi.encode(unsupported));
+            _assertInvalidFeeController("LaunchSettlementVault.sol:LaunchSettlementVault", abi.encode(strategy));
+            _assertInvalidFeeController("LaunchpadFactory.sol:LaunchpadFactory",
+                abi.encode(strategy, address(0), address(0), implementation));
+        }
+    }
+
+    function _assertInvalidFeeController(string memory artifact, bytes memory args) internal {
+        bytes memory code = abi.encodePacked(vm.getCode(artifact), args);
+        address deployed;
+        bytes4 reason;
+        assembly ("memory-safe") {
+            deployed := create(0, add(code, 32), mload(code))
+            if eq(returndatasize(), 4) {
+                returndatacopy(0, 0, 4)
+                reason := mload(0)
+            }
+        }
+        assertEq(deployed, address(0));
+        assertEq(reason, LaunchpadFactory.InvalidConfiguration.selector);
     }
 
     function testRejectsTinyLiquidityBudgetsAndAcceptsExactMinimum() public {

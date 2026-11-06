@@ -104,7 +104,10 @@ contract LaunchSettlementVault is IInitializerHook, BlockNumberish {
         if (address(strategy_).code.length == 0) revert InvalidConfiguration();
         address initializerFactory = strategy_.initializerFactory();
         address controller = ILaunchAuctionFactory(initializerFactory).protocolFeeController();
-        if (controller.codehash != keccak256(type(ZeroFeeController).runtimeCode)) revert InvalidConfiguration();
+        // Stock CCA permanently disables protocol fees when its immutable controller is zero.
+        if (controller != address(0) && controller.codehash != keccak256(type(ZeroFeeController).runtimeCode)) {
+            revert InvalidConfiguration();
+        }
         strategy = strategy_;
         poolManager = strategy_.poolManager();
         positionManager = strategy_.positionManager();

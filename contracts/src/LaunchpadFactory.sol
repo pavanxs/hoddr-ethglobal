@@ -89,7 +89,9 @@ contract LaunchpadFactory is BlockNumberish {
             revert InvalidConfiguration();
         }
         address controller = ILaunchAuctionFactory(strategy.initializerFactory()).protocolFeeController();
-        if (controller.codehash != keccak256(type(ZeroFeeController).runtimeCode)) revert InvalidConfiguration();
+        if (controller != address(0) && controller.codehash != keccak256(type(ZeroFeeController).runtimeCode)) {
+            revert InvalidConfiguration();
+        }
         wrapperFactory = new BidLockFactory(address(this));
         hookDeployer = new PhaseCapHookDeployer();
     }

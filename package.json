@@ -18,7 +18,10 @@
     "test:browser": "node tests/browser-smoke.mjs",
     "deploy:local": "node scripts/deploy-local.mjs",
     "demo:local": "bun run scripts/seed-local.ts",
-    "test:partial": "bun run tests/partial-exit.ts"
+    "test:partial": "bun run tests/partial-exit.ts",
+    "check:sepolia": "node scripts/check-sepolia-gates.mjs",
+    "deploy:sepolia-fork": "node scripts/deploy-sepolia.mjs --fork",
+    "test:sepolia-fork": "bun run scripts/smoke-sepolia-fork.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "5.3.0",

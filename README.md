@@ -42,4 +42,4 @@ The dev command starts a fresh, disposable Anvil chain on port 8547, deploys the
 | `node tests/browser-smoke.mjs --write-local` | Browser interactions that create an auction and move local test funds |
 | `npm run typecheck` and `npm run build` | TypeScript and production assets |
 
-See [launch rules](docs/launchpad-spec.md), [identity and ENS](docs/identity-ens.md), [World ID staging](docs/world-staging.md) and [pinned upstream sources](contracts.sources.json).
+See [launch rules](docs/launchpad-spec.md), [identity and ENS](docs/identity-ens.md), [World ID staging](docs/world-staging.md) [Sepolia deployment and fork checks](docs/sepolia-integration.md), and [pinned upstream sources](contracts.sources.json).
